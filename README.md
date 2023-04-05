@@ -154,3 +154,4 @@ We welcome contributions to Scaffold-Eth 2!
 Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/se-2/blob/master/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-Eth 2.
 
 # scaff-eth-hackathon
+# scaff-eth-hackathon
