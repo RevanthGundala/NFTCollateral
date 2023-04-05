@@ -1,117 +1,169 @@
-import { useEffect, useRef, useState } from "react";
-import Marquee from "react-fast-marquee";
-import { useAnimationConfig, useScaffoldContractRead, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
-
-const MARQUEE_PERIOD_IN_SEC = 5;
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState } from "react";
+import { CopyIcon } from "./assets/CopyIcon";
+import { DiamondIcon } from "./assets/DiamondIcon";
+import { HareIcon } from "./assets/HareIcon";
+import { ethers } from "ethers";
+import { useAccount } from "wagmi";
+import { ArrowSmallRightIcon } from "@heroicons/react/24/outline";
+import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
+import { useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
 
 export const ContractData = () => {
-  const [transitionEnabled, setTransitionEnabled] = useState(true);
-  const [isRightDirection, setIsRightDirection] = useState(false);
-  const [marqueeSpeed, setMarqueeSpeed] = useState(0);
+  const [tokenId, setTokenId] = useState("");
+  const [nftAddress, setNftAddress] = useState("");
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const greetingRef = useRef<HTMLDivElement>(null);
+  const { address } = useAccount();
 
-  const { data: totalCounter } = useScaffoldContractRead({
-    contractName: "YourContract",
-    functionName: "totalCounter",
+  // const { data: balance } = useScaffoldContractRead({
+  //   contractName: "NFTCollateral",
+  //   functionName: "getAddressBalance",
+  // });
+
+  const { data: s_owner } = useScaffoldContractRead({
+    contractName: "NFTCollateral",
+    functionName: "getOwner",
   });
 
-  const { data: currentGreeting, isLoading: isGreetingLoading } = useScaffoldContractRead({
-    contractName: "YourContract",
-    functionName: "greeting",
+  const { data: updateInterval } = useScaffoldContractRead({
+    contractName: "NFTCollateral",
+    functionName: "updateInterval",
+  });
+
+  const { data: lastUpkeepTimeStamp } = useScaffoldContractRead({
+    contractName: "NFTCollateral",
+    functionName: "lastUpkeepTimeStamp",
+  });
+
+  // const { data: latestResponse } = useScaffoldContractRead({
+  //   contractName: "NFTCollateral",
+  //   functionName: "latestResponse",
+  // });
+
+  // const { data: latestError } = useScaffoldContractRead({
+  //   contractName: "NFTCollateral",
+  //   functionName: "latestError",
+  // });
+
+  const { data: withdrawAllowed } = useScaffoldContractRead({
+    contractName: "NFTCollateral",
+    functionName: "getWithdrawAllowed",
+  });
+
+  const { data: upKeepFinished } = useScaffoldContractRead({
+    contractName: "NFTCollateral",
+    functionName: "getUpKeepFinished",
   });
 
   useScaffoldEventSubscriber({
-    contractName: "YourContract",
-    eventName: "GreetingChange",
-    listener: (greetingSetter, newGreeting, premium, value) => {
-      console.log(greetingSetter, newGreeting, premium, value);
+    contractName: "NFTCollateral",
+    eventName: "OCRResponse",
+    listener: (requestId, response, err) => {
+      console.log(requestId, response, err);
     },
   });
 
-  const { showAnimation } = useAnimationConfig(totalCounter);
+  // const { isLoading } = useScaffoldContractWrite({
+  //   contractName: "NFTCollateral",
+  //   functionName: "withdrawNFT",
+  //   args: [nftAddress, tokenId],
+  // // });
 
-  const showTransition = transitionEnabled && !!currentGreeting && !isGreetingLoading;
-
-  useEffect(() => {
-    if (transitionEnabled && containerRef.current && greetingRef.current) {
-      setMarqueeSpeed(
-        Math.max(greetingRef.current.clientWidth, containerRef.current.clientWidth) / MARQUEE_PERIOD_IN_SEC,
-      );
-    }
-  }, [transitionEnabled, containerRef, greetingRef]);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
 
   return (
-    <div className="flex flex-col justify-center items-center bg-[url('/assets/gradient-bg.png')] bg-[length:100%_100%] py-10 px-5 sm:px-0 lg:py-auto max-w-[100vw] ">
-      <div
-        className={`flex flex-col max-w-md bg-base-200 bg-opacity-70 rounded-2xl shadow-lg px-5 py-4 w-full ${
-          showAnimation ? "animate-zoom" : ""
-        }`}
-      >
-        <div className="flex justify-between w-full">
-          <button
-            className="btn btn-circle btn-ghost relative bg-center bg-[url('/assets/switch-button-on.png')] bg-no-repeat"
-            onClick={() => {
-              setTransitionEnabled(!transitionEnabled);
-            }}
-          >
-            <div
-              className={`absolute inset-0 bg-center bg-no-repeat bg-[url('/assets/switch-button-off.png')] transition-opacity ${
-                transitionEnabled ? "opacity-0" : "opacity-100"
+    <div className="flex bg-base-300 relative pb-10">
+      <DiamondIcon className="absolute top-24" />
+      <CopyIcon className="absolute bottom-0 left-36" />
+      <HareIcon className="absolute right-0 bottom-24" />
+      <div className="flex flex-col w-full mx-5 sm:mx-8 2xl:mx-20">
+        <div className={`mt-10 flex gap-2 max-w-2xl`}>
+          <div className="flex gap-5 bg-base-200 bg-opacity-80 z-0 p-7 rounded-2xl shadow-lg">
+            <span className="text-3xl">👋🏻</span>
+            <div>
+              <div>
+                {lastUpkeepTimeStamp?.toString() === "0" ? (
+                  <div>Time has not started yet</div>
+                ) : (
+                  <div>
+                    <div className="text-xl">Start time: {lastUpkeepTimeStamp?.toString()}</div>
+                    <div className="text-xl">Time Left: {updateInterval?.toString()} seconds</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col mt-6 px-7 py-8 bg-base-200 opacity-80 rounded-2xl shadow-lg border-2 border-primary">
+          <span className="text-4xl sm:text-6xl text-black">Withdraw NFT</span>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5">
+            <form onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="greetingInput">NFT Address:</label>
+                <input
+                  id="greetingInput"
+                  type="text"
+                  placeholder="0x...."
+                  className="input font-bai-jamjuree w-full px-5 bg-[url('/assets/gradient-bg.png')] bg-[length:100%_100%] border border-primary text-lg sm:text-2xl placeholder-white "
+                  value={nftAddress}
+                  onChange={e => setNftAddress(e.target.value)}
+                />
+              </div>
+              <div className="mt-5">
+                <label htmlFor="nameInput">Token ID:</label>
+                <input
+                  id="nameInput"
+                  type="text"
+                  placeholder="0"
+                  className="input font-bai-jamjuree w-full px-5 bg-[url('/assets/gradient-bg.png')] bg-[length:100%_100%] border border-primary text-lg sm:text-2xl placeholder-white "
+                  value={tokenId}
+                  onChange={e => setTokenId(e.target.value)}
+                />
+              </div>
+              <div className="flex rounded-full border border-primary p-1 flex-shrink-0 mt-10 max-w-[fit-content]">
+                <div className="flex rounded-full border-2 border-primary p-1">
+                  {/*<button
+                    type="submit"
+                    disabled={withdrawAllowed && upKeepFinished ? false : true}
+                    className={`btn btn-primary rounded-full capitalize font-normal font-white w-24 flex items-center gap-1 hover:gap-2 transition-all tracking-widest ${
+                      isLoading ? "loading" : ""
+                    }`}
+                  >
+                    {!isLoading && (
+                      <>
+                        Send <ArrowSmallRightIcon className="w-3 h-3 mt-0.5" />
+                      </>
+                    )}
+                    </button>*/}
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div className="flex flex-col mt-6 px-7 py-8 bg-base-200 opacity-80 rounded-2xl shadow-lg border-2 border-primary">
+          <div>
+            <p className="text-4xl sm:text-6xl text-black">Withdraw ETH</p>
+            <p>Contract Balance: 0 ETH</p>
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5">
+            {/*<button
+              type="submit"
+              disabled={s_owner === address ? false : true}
+              className={`btn btn-primary rounded-full capitalize font-normal font-white w-24 flex items-center gap-1 hover:gap-2 transition-all tracking-widest ${
+                isLoading ? "loading" : ""
               }`}
-            />
-          </button>
-          <div className="bg-secondary border border-primary rounded-xl flex">
-            <div className="p-2 py-1 border-r border-primary flex items-end">Total count</div>
-            <div className="text-4xl text-right min-w-[3rem] px-2 py-1 flex justify-end font-bai-jamjuree">
-              {totalCounter?.toString() || "0"}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-3 border border-primary bg-neutral rounded-3xl text-secondary  overflow-hidden text-[116px] whitespace-nowrap w-full uppercase tracking-tighter font-bai-jamjuree leading-tight">
-          <div className="relative overflow-x-hidden" ref={containerRef}>
-            {/* for speed calculating purposes */}
-            <div className="absolute -left-[9999rem]" ref={greetingRef}>
-              <div className="px-4">{currentGreeting}</div>
-            </div>
-            {new Array(3).fill("").map((_, i) => {
-              const isLineRightDirection = i % 2 ? isRightDirection : !isRightDirection;
-              return (
-                <Marquee
-                  key={i}
-                  direction={isLineRightDirection ? "right" : "left"}
-                  gradient={false}
-                  play={showTransition}
-                  speed={marqueeSpeed}
-                  className={i % 2 ? "-my-10" : ""}
-                >
-                  <div className="px-4">{currentGreeting || " "}</div>
-                </Marquee>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-end justify-between">
-          <button
-            className={`btn btn-circle btn-ghost border border-primary hover:border-primary w-12 h-12 p-1 bg-neutral flex items-center ${
-              isRightDirection ? "justify-start" : "justify-end"
-            }`}
-            onClick={() => {
-              if (transitionEnabled) {
-                setIsRightDirection(!isRightDirection);
-              }
-            }}
-          >
-            <div className="border border-primary rounded-full bg-secondary w-2 h-2" />
-          </button>
-          <div className="w-44 p-0.5 flex items-center bg-neutral border border-primary rounded-full">
-            <div
-              className="h-1.5 border border-primary rounded-full bg-secondary animate-grow"
-              style={{ animationPlayState: showTransition ? "running" : "paused" }}
-            />
+            >
+              {!isLoading && (
+                <>
+                  Send <ArrowSmallRightIcon className="w-3 h-3 mt-0.5" />
+                </>
+              )}
+              </button>*/}
           </div>
         </div>
       </div>

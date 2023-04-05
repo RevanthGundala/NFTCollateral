@@ -6,6 +6,9 @@ import { getContractNames } from "~~/utils/scaffold-eth/contractNames";
 
 const Debug: NextPage = () => {
   const contractNames = getContractNames();
+  {
+    console.log(contractNames);
+  }
   const [selectedContract, setSelectedContract] = useState<ContractName>(contractNames[0]);
 
   return (
