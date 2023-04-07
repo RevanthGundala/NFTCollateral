@@ -3,7 +3,7 @@ import { useState } from "react";
 import { CopyIcon } from "./assets/CopyIcon";
 import { DiamondIcon } from "./assets/DiamondIcon";
 import { HareIcon } from "./assets/HareIcon";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { ArrowSmallRightIcon } from "@heroicons/react/24/outline";
 import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
@@ -15,11 +15,6 @@ export const ContractData = () => {
   const [nftAddress, setNftAddress] = useState("");
 
   const { address } = useAccount();
-
-  // const { data: balance } = useScaffoldContractRead({
-  //   contractName: "NFTCollateral",
-  //   functionName: "getAddressBalance",
-  // });
 
   const { data: s_owner } = useScaffoldContractRead({
     contractName: "NFTCollateral",
@@ -36,16 +31,6 @@ export const ContractData = () => {
     functionName: "lastUpkeepTimeStamp",
   });
 
-  // const { data: latestResponse } = useScaffoldContractRead({
-  //   contractName: "NFTCollateral",
-  //   functionName: "latestResponse",
-  // });
-
-  // const { data: latestError } = useScaffoldContractRead({
-  //   contractName: "NFTCollateral",
-  //   functionName: "latestError",
-  // });
-
   const { data: withdrawAllowed } = useScaffoldContractRead({
     contractName: "NFTCollateral",
     functionName: "getWithdrawAllowed",
@@ -56,6 +41,11 @@ export const ContractData = () => {
     functionName: "getUpKeepFinished",
   });
 
+  const { data: totalValueLocked } = useScaffoldContractRead({
+    contractName: "NFTCollateral",
+    functionName: "getTotalValueLocked",
+  });
+
   useScaffoldEventSubscriber({
     contractName: "NFTCollateral",
     eventName: "OCRResponse",
@@ -64,14 +54,22 @@ export const ContractData = () => {
     },
   });
 
-  // const { isLoading } = useScaffoldContractWrite({
-  //   contractName: "NFTCollateral",
-  //   functionName: "withdrawNFT",
-  //   args: [nftAddress, tokenId],
-  // // });
+  // TODO: figure out how to insert tokenID without getting BigNumber error
+  const { isLoading, writeAsync } = useScaffoldContractWrite({
+    contractName: "NFTCollateral",
+    functionName: "withdrawNFT",
+    args: [ethers.BigNumber.from(tokenId), nftAddress],
+  });
+
+  const { isLoading: isLoading2, writeAsync: writeAsync2 } = useScaffoldContractWrite({
+    contractName: "NFTCollateral",
+    functionName: "withdraw",
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    await writeAsync();
+    console.log("NFT withdrawn");
   };
 
   return (
@@ -126,7 +124,7 @@ export const ContractData = () => {
               </div>
               <div className="flex rounded-full border border-primary p-1 flex-shrink-0 mt-10 max-w-[fit-content]">
                 <div className="flex rounded-full border-2 border-primary p-1">
-                  {/*<button
+                  <button
                     type="submit"
                     disabled={withdrawAllowed && upKeepFinished ? false : true}
                     className={`btn btn-primary rounded-full capitalize font-normal font-white w-24 flex items-center gap-1 hover:gap-2 transition-all tracking-widest ${
@@ -138,7 +136,7 @@ export const ContractData = () => {
                         Send <ArrowSmallRightIcon className="w-3 h-3 mt-0.5" />
                       </>
                     )}
-                    </button>*/}
+                  </button>
                 </div>
               </div>
             </form>
@@ -146,24 +144,29 @@ export const ContractData = () => {
         </div>
         <div className="flex flex-col mt-6 px-7 py-8 bg-base-200 opacity-80 rounded-2xl shadow-lg border-2 border-primary">
           <div>
-            <p className="text-4xl sm:text-6xl text-black">Withdraw ETH</p>
-            <p>Contract Balance: 0 ETH</p>
+            <p className="text-4xl sm:text-6xl text-black">Withdraw</p>
+            <p>
+              Contract Balance:{" "}
+              {totalValueLocked?._hex !== undefined ? ethers.BigNumber.from(totalValueLocked?._hex).toString() : "0"}{" "}
+              ETH
+            </p>
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5">
-            {/*<button
+            <button
               type="submit"
+              onClick={writeAsync2}
               disabled={s_owner === address ? false : true}
               className={`btn btn-primary rounded-full capitalize font-normal font-white w-24 flex items-center gap-1 hover:gap-2 transition-all tracking-widest ${
-                isLoading ? "loading" : ""
+                isLoading2 ? "loading" : ""
               }`}
             >
-              {!isLoading && (
+              {!isLoading2 && (
                 <>
                   Send <ArrowSmallRightIcon className="w-3 h-3 mt-0.5" />
                 </>
               )}
-              </button>*/}
+            </button>
           </div>
         </div>
       </div>

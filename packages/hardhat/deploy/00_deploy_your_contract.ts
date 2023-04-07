@@ -11,7 +11,7 @@ import { parseEther } from "ethers/lib/utils";
 const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const oracleAddress = "0xeA6721aC65BCeD841B8ec3fc5fEdeA6141a0aDE4";
   const updateInterval = "3600";
-  const minimumAmount = parseEther("0.001");
+  const minimumAmount = parseEther("0.00001");
 
   // Set your contract name.
   const contractName = "NFTCollateral";
