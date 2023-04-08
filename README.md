@@ -1,14 +1,19 @@
-# Scaffold-Eth 2
+# NFT Collateral
 
 ⚠️ This project is currently under active development. Things might break. Feel free to check the open issues & create new ones.
 
-Scaffold-Eth 2 is an open-source toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+Description
 
-It's a new version of scaffold-eth with its core functionality. Built using NextJS, RainbowKit, Hardhat, Wagmi and Typescript.
+NFT Collateral is created on the scaffold-eth stack. The goal of the dApp is to allow users to deposit NFTs as collateral into a contract. 
+By a certain period of time, users must replace their NFT with the appropriate amount of collateral in Ether before they can withdraw their NFT. 
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+Use Case
+Imagine you are hosting an event and their is an entry fee to get in. I want to get in the event, but all of my money is locked in a Uniswap V3 pool on ETH Mainnet. However, I do have a Bored Ape NFT that is worth quite a bit. Gas fees are super high right now on ETH Mainnet and I really don't want to exit the pool to get liquidity. But what if the event organizers allowed me to deposit my NFT as collateral? Then, they could let me into the event, and I can deposit the entrance fee into the contract before the event is over. If the event is over and I haven't deposited the entrance fee, then the event organizers will have ownership of my NFT, and they can choose to liquidate or hold onto it if they'd like. If I do deposit the entrance fee before the event is over, then I can withdraw by Bored Ape from the contract.
+
+Details
+The Collateral of the NFT is uses Chainlink Functions to fetch the ```last_sale``` price from the OpeanSea API. This allows the smart contract to use that price as the current collateral supported by that user. Instead of making the API call on the client side, Chainlink Functions allows this to all be operated on-chain. The contract also uses Chainlink Automation/Keepers in order to set the updateInterval, and check if the time is passed by. As soon as the NFT is deposited, the timer starts at which point the user will have a certain amount of time that they can deposit the equiivalent collateral in ETH. If not, they lose their NFT.
+
+NOTE: This project is currently in demo. OpeanSea API only supports Goerli testnet, and different mainnets. Chainlink Functions is still in early beta and supports only Polygon Mumbai and Sepoilia testnets. 
 
 ## Contents
 
