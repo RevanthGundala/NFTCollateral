@@ -21,6 +21,10 @@ The Collateral of the NFT is uses Chainlink Functions to fetch the ```last_sale`
 
 The contract also uses Chainlink Automation/Keepers in order to set the updateInterval, and check if the time is passed by. As soon as the NFT is deposited, the timer starts at which point the user will have a certain amount of time that they can deposit the equiivalent collateral in ETH. If not, they lose their NFT.
 
+## Future Uses
+
+The real value of this project is being able to depost NFT's as collateral in an on-chain way. This could have real use cases in DeFi such as borrowing against the value of your NFT if you do not have liquidity. 
+
 ## Requirements
 
 Before you begin, you need to install the following tools:
