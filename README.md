@@ -1,31 +1,25 @@
 # NFT Collateral
 
-⚠️ This project is currently under active development. Things might break. Feel free to check the open issues & create new ones.
+⚠️ NOTE: This project is currently in demo. OpeanSea API only supports Goerli testnet, and different mainnets. Chainlink Functions is still in early beta and supports only Polygon Mumbai and Sepoilia testnets. 
 
-Description
+## Video Submission
+
+## Description
 
 NFT Collateral is created on the scaffold-eth stack. The goal of the dApp is to allow users to deposit NFTs as collateral into a contract. 
 By a certain period of time, users must replace their NFT with the appropriate amount of collateral in Ether before they can withdraw their NFT. 
 
-Use Case
-Imagine you are hosting an event and their is an entry fee to get in. I want to get in the event, but all of my money is locked in a Uniswap V3 pool on ETH Mainnet. However, I do have a Bored Ape NFT that is worth quite a bit. Gas fees are super high right now on ETH Mainnet and I really don't want to exit the pool to get liquidity. But what if the event organizers allowed me to deposit my NFT as collateral? Then, they could let me into the event, and I can deposit the entrance fee into the contract before the event is over. If the event is over and I haven't deposited the entrance fee, then the event organizers will have ownership of my NFT, and they can choose to liquidate or hold onto it if they'd like. If I do deposit the entrance fee before the event is over, then I can withdraw by Bored Ape from the contract.
+## Use Case
 
-Details
-The Collateral of the NFT is uses Chainlink Functions to fetch the ```last_sale``` price from the OpeanSea API. This allows the smart contract to use that price as the current collateral supported by that user. Instead of making the API call on the client side, Chainlink Functions allows this to all be operated on-chain. The contract also uses Chainlink Automation/Keepers in order to set the updateInterval, and check if the time is passed by. As soon as the NFT is deposited, the timer starts at which point the user will have a certain amount of time that they can deposit the equiivalent collateral in ETH. If not, they lose their NFT.
+Imagine you are hosting an event and their is an entry fee to get in. I want to get in the event, but all of my money is locked in a Uniswap V3 pool on ETH Mainnet. However, I do have a Bored Ape NFT that is worth quite a bit. Gas fees are super high right now on ETH Mainnet and I really don't want to exit the pool to get liquidity. But what if the event organizers allowed me to deposit my NFT as collateral? 
 
-NOTE: This project is currently in demo. OpeanSea API only supports Goerli testnet, and different mainnets. Chainlink Functions is still in early beta and supports only Polygon Mumbai and Sepoilia testnets. 
+Then, they could let me into the event, and I can deposit the entrance fee into the contract before the event is over. If the event is over and I haven't deposited the entrance fee, then the event organizers will have ownership of my NFT, and they can choose to liquidate or hold onto it if they'd like. If I do deposit the entrance fee before the event is over, then I can withdraw by Bored Ape from the contract.
 
-## Contents
+## Details
 
-- [Requirements](#requirements)
-- [Quickstart](#Quickstart)
-- [Deploying your Smart Contracts to a Live Network](#Deploying-your-Smart-Contracts-to-a-live-network)
-- [Deploying your NextJS App](#Deploying-your-NextJS-App)
-- [Disabling Type & Linting Error Checks](#Disabling-type-and-linting-error-checks)
-  * [Disabling commit checks](#Disabling-commit-checks)
-  * [Deploying to Vercel without any checks](#Deploying-to-Vercel-without-any-checks)
-  * [Disabling Github Workflow](#Disabling-Github-Workflow)
-- [Contributing to Scaffold-Eth 2](#Contributing-to-Scaffold-Eth-2)
+The Collateral of the NFT is uses Chainlink Functions to fetch the ```last_sale``` price from the OpeanSea API. This allows the smart contract to use that price as the current collateral supported by that user. Instead of making the API call on the client side, Chainlink Functions allows this to all be operated on-chain. 
+
+The contract also uses Chainlink Automation/Keepers in order to set the updateInterval, and check if the time is passed by. As soon as the NFT is deposited, the timer starts at which point the user will have a certain amount of time that they can deposit the equiivalent collateral in ETH. If not, they lose their NFT.
 
 ## Requirements
 
@@ -106,57 +100,16 @@ Run the command below to deploy the smart contract to the target network. Make s
 ```
 yarn deploy --network network_name
 ```
+4. Add contract to Chainlink SubID
+```
+cd functions-hardhat-starter-kit
+npx hardhat functions-sub-add --network NETWORK_NAME --subid YOUR_SUBID --contract YOUR_CONTRACT_ADDRESS
+```
 
-4. Verify your smart contract
+5. Verify your smart contract
 
 You can verify your smart contract on Etherscan by running:
 
 ```
-yarn verify --network network_name
+yarn verify --network NETWORK_NAME YOUR_DEPLOYED_CONTRACT_ADDRESS CHAINLINK_FUNCTIONS_ORACLE_ADDRESS CHAINLINK_FUNCTIONS_SUB_ID MINIMUM_AMOUNT
 ```
-
-## Deploying your NextJS App
-
-Run `yarn vercel` and follow the steps to deploy to Vercel. Once you log in (email, github, etc), the default options should work. It'll give you a public URL.
-
-If you want to redeploy to the same production URL you can run `yarn vercel --prod`. If you omit the `--prod` flag it will deploy it to a preview/test URL.
-
-**Make sure your `packages/nextjs/scaffold.config.ts` file has the values you need.**
-
-**Hint**: We recommend connecting the project GitHub repo to Vercel so you the gets automatically deployed when pushing to `main`
-
-## Disabling type and linting error checks
-> **Hint**
-> Typescript helps you catch errors at compile time, which can save time and improve code quality, but can be challenging for those who are new to the language or who are used to the more dynamic nature of JavaScript. Below are the steps to disable type & lint check at different levels
-
-### Disabling commit checks
-We run `pre-commit` [git hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) which lints the staged files and don't let you commit if there is an linting error.
-
-To disable this, go to `.husky/pre-commit` file and comment out `yarn lint-staged --verbose`
-
-```diff
-- yarn lint-staged --verbose
-+ # yarn lint-staged --verbose
-```
-
-### Deploying to Vercel without any checks
-Vercel by default runs types and lint checks while developing `build` and deployment fails if there is a types or lint error.
-
-To ignore types and lint error checks while deploying, use :
-```shell
-yarn vercel:yolo
-```
-
-### Disabling Github Workflow
-We have github workflow setup checkout `.github/workflows/lint.yaml` which runs types and lint error checks every time code is __pushed__ to `main` branch or __pull request__ is made to `main` branch
-
-To disable it, **delete `.github` directory**
-
-## Contributing to Scaffold-Eth 2
-
-We welcome contributions to Scaffold-Eth 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/se-2/blob/master/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-Eth 2.
-
-# scaff-eth-hackathon
-# scaff-eth-hackathon
